@@ -2,18 +2,21 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
     public float speed = 5f;
+    private Rigidbody2D rb;
+    private Vector2 movement;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
+    void Start() {
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-        transform.Translate(new Vector2(x, y) * speed * Time.deltaTime);
+    void Update() {
+        // Сохраняем ввод игрока
+        movement.x = Input.GetAxisRaw("Horizontal");
+        movement.y = Input.GetAxisRaw("Vertical");
+    }
+
+    void FixedUpdate() {
+        // Двигаем через физику
+        rb.MovePosition(rb.position + movement * speed * Time.fixedDeltaTime);
     }
 }
