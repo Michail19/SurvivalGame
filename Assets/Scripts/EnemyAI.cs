@@ -40,5 +40,12 @@ public class EnemyAI : MonoBehaviour {
         if (Random.value < 0.005f) {
             direction *= -1;
         }
+
+        if (direction.x > 0) {
+            transform.localScale = new Vector3(-1, 1, 1); // Смотрит вправо
+        }
+        else if (direction.x < 0) {
+            transform.localScale = new Vector3(1, 1, 1); // Смотрит влево (зеркально)
+        }
     }
 }
