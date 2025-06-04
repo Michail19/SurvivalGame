@@ -2,50 +2,105 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour {
     public float speed = 2f;
+    public float jumpForce = 6f;
     public float chaseDistance = 3f;
+
     private bool isChasing = false;
+    private bool isGrounded = false;
+
     private Transform player;
     private Vector2 direction = Vector2.left;
+    private Rigidbody2D rb;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;
+
+    public int damage = 10;
+    public float attackCooldown = 1.5f;
+    private float lastAttackTime;
+
+    void Start() {
+        rb = GetComponent<Rigidbody2D>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
+
+        // РџРѕРїСЂРѕР±СѓРµРј РЅР°Р№С‚Рё GroundCheck, РµСЃР»Рё РЅРµ РЅР°Р·РЅР°С‡РµРЅ
+        if (groundCheck == null) {
+            groundCheck = transform.Find("GroundCheck");
+            if (groundCheck == null)
+                Debug.LogWarning("EnemyAI: GroundCheck РЅРµ РЅР°Р№РґРµРЅ");
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        float dist = Vector2.Distance(transform.position, player.position);
+    void Update() {
+        // РџСЂРѕРІРµСЂРєР°: СЃС‚РѕРёС‚ Р»Рё Р±РѕС‚ РЅР° Р·РµРјР»Рµ
+        if (groundCheck != null) {
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        }
 
-        if (dist < chaseDistance) {
-            isChasing = true;
-        }
-        else {
-            isChasing = false;
-        }
+        float dist = Vector2.Distance(transform.position, player.position);
+        isChasing = dist < chaseDistance;
 
         if (isChasing) {
-            transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
+            ChasePlayer();
         }
         else {
             Patrol();
         }
     }
 
-    void Patrol() {
-        transform.Translate(direction * speed * Time.deltaTime);
+    void ChasePlayer() {
+        Vector2 moveDir = (player.position - transform.position).normalized;
+        rb.linearVelocity = new Vector2(moveDir.x * speed, rb.linearVelocity.y);
 
-        // Простейшее переключение направления (можно сделать по таймеру или столкновению со стеной)
+        // РџСЂС‹Р¶РѕРє РїСЂРё РїРµСЂРµРїР°РґРµ РїРѕ РІС‹СЃРѕС‚Рµ
+        if (isGrounded && player.position.y > transform.position.y + 0.5f) {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        }
+
+        // РџРѕРІРѕСЂРѕС‚
+        if (moveDir.x > 0)
+            transform.localScale = new Vector3(-1, 1, 1);
+        else if (moveDir.x < 0)
+            transform.localScale = new Vector3(1, 1, 1);
+    }
+
+    void Patrol() {
+        rb.linearVelocity = new Vector2(direction.x * speed, rb.linearVelocity.y);
+
+        // РџСЂС‹Р¶РѕРє С‡РµСЂРµР· РїСЂРµРїСЏС‚СЃС‚РІРёРµ (РЅР°РїСЂРёРјРµСЂ, СЃР»СѓС‡Р°Р№РЅРѕ)
+        if (isGrounded && Random.value < 0.002f) {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        }
+
+        // РЎР»СѓС‡Р°Р№РЅР°СЏ СЃРјРµРЅР° РЅР°РїСЂР°РІР»РµРЅРёСЏ
         if (Random.value < 0.005f) {
             direction *= -1;
         }
 
-        if (direction.x > 0) {
-            transform.localScale = new Vector3(-1, 1, 1); // Смотрит вправо
-        }
-        else if (direction.x < 0) {
-            transform.localScale = new Vector3(1, 1, 1); // Смотрит влево (зеркально)
+        if (direction.x > 0)
+            transform.localScale = new Vector3(-1, 1, 1);
+        else if (direction.x < 0)
+            transform.localScale = new Vector3(1, 1, 1);
+    }
+
+    void OnDrawGizmosSelected() {
+        if (groundCheck != null) {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
     }
+
+    void OnCollisionStay2D(Collision2D collision) {
+        if (collision.gameObject.CompareTag("Player")) {
+            if (Time.time > lastAttackTime + attackCooldown) {
+                PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+                if (playerHealth != null) {
+                    playerHealth.TakeDamage(damage);
+                    lastAttackTime = Time.time;
+                }
+            }
+        }
+    }
+
 }

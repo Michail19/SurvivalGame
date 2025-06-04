@@ -12,6 +12,10 @@ public class PlayerController : MonoBehaviour {
     public LayerMask groundLayer;         // Слой земли
     private bool isGrounded;
 
+    public float attackRange = 1f;
+    public int attackDamage = 20;
+    public LayerMask enemyLayer;
+
     void Start() {
         rb = GetComponent<Rigidbody2D>();
 
@@ -39,10 +43,24 @@ public class PlayerController : MonoBehaviour {
         else if (movement.x < 0) {
             transform.localScale = new Vector3(1, 1, 1); // Смотрит влево
         }
+
+        if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(1)) {
+            AttackNearbyEnemies();
+        }
     }
 
     void FixedUpdate() {
         // Горизонтальное движение (не трогаем вертикальную скорость)
         rb.linearVelocity = new Vector2(movement.x * speed, rb.linearVelocity.y);
+    }
+
+    void AttackNearbyEnemies() {
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
+        foreach (Collider2D enemy in enemies) {
+            EnemyHealth eh = enemy.GetComponent<EnemyHealth>();
+            if (eh != null) {
+                eh.TakeDamage(attackDamage);
+            }
+        }
     }
 }
