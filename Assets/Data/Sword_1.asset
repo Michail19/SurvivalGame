@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f7305cca31f889c47a06f06646763fd6, type: 3}
-  m_Name: Sword
+  m_Name: Sword_1
   m_EditorClassIdentifier: 
-  itemName: "\u041C\u0435\u0447"
-  itemIcon: {fileID: 21300000, guid: 08d5ec2d201ece949a5e428ba3ea0e63, type: 3}
-  itemPrefab: {fileID: 5203218147085020581, guid: b9abf2ad7bdf928418a88f7e27d69f25, type: 3}
+  itemName: "\u041C\u0435\u0447 \u0441\u0432\u0435\u0442\u0430"
+  itemIcon: {fileID: 21300000, guid: a332f9cc2040f6042a04c65fa9e4a000, type: 3}
+  itemPrefab: {fileID: 5767378875365861962, guid: 7fd608e9736db0640ae6f3ea4e644986, type: 3}
