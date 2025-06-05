@@ -44,9 +44,15 @@ public class PlayerController : MonoBehaviour {
             transform.localScale = new Vector3(1, 1, 1); // Смотрит влево
         }
 
-        if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(1)) {
+        //if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0)) {
+        //    AttackNearbyEnemies();
+        //}
+
+        if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0)) {
+            Debug.Log("F НАЖАТ — запускаем атаку");
             AttackNearbyEnemies();
         }
+
     }
 
     void FixedUpdate() {
@@ -55,12 +61,25 @@ public class PlayerController : MonoBehaviour {
     }
 
     void AttackNearbyEnemies() {
+        Debug.Log("▶ Проверяем OverlapCircle...");
+
         Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
+
+        Debug.Log("Найдено врагов: " + enemies.Length);
+
         foreach (Collider2D enemy in enemies) {
+            Debug.Log("→ Объект: " + enemy.name + ", Layer: " + LayerMask.LayerToName(enemy.gameObject.layer));
+
             EnemyHealth eh = enemy.GetComponent<EnemyHealth>();
             if (eh != null) {
                 eh.TakeDamage(attackDamage);
+                Debug.Log("✔ Нанесён урон врагу: " + enemy.name);
+            }
+            else {
+                Debug.Log("⚠ Нет EnemyHealth у " + enemy.name);
             }
         }
     }
+
+
 }

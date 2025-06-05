@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum Faction {
+    Player,
+    Red,
+    Blue
+}
+
 public class EnemyAI : MonoBehaviour {
     public float speed = 2f;
     public float jumpForce = 6f;
@@ -19,6 +25,8 @@ public class EnemyAI : MonoBehaviour {
     public int damage = 10;
     public float attackCooldown = 1.5f;
     private float lastAttackTime;
+
+    public Faction faction;
 
     void Start() {
         rb = GetComponent<Rigidbody2D>();
@@ -92,15 +100,40 @@ public class EnemyAI : MonoBehaviour {
     }
 
     void OnCollisionStay2D(Collision2D collision) {
-        if (collision.gameObject.CompareTag("Player")) {
-            if (Time.time > lastAttackTime + attackCooldown) {
-                PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-                if (playerHealth != null) {
-                    playerHealth.TakeDamage(damage);
-                    lastAttackTime = Time.time;
+        // Игнорируем самих себя
+        if (collision.gameObject == gameObject) return;
+
+        // Получаем скрипт врага
+        EnemyAI otherEnemy = collision.gameObject.GetComponent<EnemyAI>();
+        PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+
+        // Если это игрок — атакуем всегда
+        if (playerHealth != null) {
+            Attack(playerHealth);
+            return;
+        }
+
+        // Если это другой враг
+        if (otherEnemy != null) {
+            // Если фракция чужая — атакуем
+            if (otherEnemy.faction != this.faction) {
+                EnemyHealth health = otherEnemy.GetComponent<EnemyHealth>();
+                if (health != null) {
+                    Attack(health); // метод наносит урон
                 }
             }
         }
     }
+
+    void Attack(MonoBehaviour target) {
+    if (Time.time > lastAttackTime + attackCooldown) {
+        if (target is EnemyHealth)
+            ((EnemyHealth)target).TakeDamage(damage);
+        else if (target is PlayerHealth)
+            ((PlayerHealth)target).TakeDamage(damage);
+
+        lastAttackTime = Time.time;
+    }
+}
 
 }
