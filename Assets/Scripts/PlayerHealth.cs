@@ -29,4 +29,9 @@ public class PlayerHealth : MonoBehaviour {
         currentHealth = maxHealth;
         Debug.Log("Игрок возродился со здоровьем: " + currentHealth);
     }
+
+    public void Heal(int amount) {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log("Игрок восстановил здоровье: " + currentHealth);
+    }
 }

@@ -72,7 +72,9 @@ public class PlayerController : MonoBehaviour {
 
             EnemyHealth eh = enemy.GetComponent<EnemyHealth>();
             if (eh != null) {
-                eh.TakeDamage(attackDamage);
+                PlayerBuffs buffs = GetComponent<PlayerBuffs>();
+                int damage = buffs != null ? buffs.GetCurrentDamage() : attackDamage;
+                eh.TakeDamage(damage);
                 Debug.Log("✔ Нанесён урон врагу: " + enemy.name);
             }
             else {
